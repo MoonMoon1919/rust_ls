@@ -10,6 +10,9 @@ use rust_ls;
 struct Args {
     #[arg(default_value = ".")]
     path: String,
+
+    #[arg(short, long)]
+    recursive: bool,
 }
 
 fn print_output(entries: &Vec<DirEntry>, buf_writer: &mut BufWriter<Stdout>) {
@@ -26,7 +29,15 @@ fn main() {
     let args = Args::parse();
     let path = Path::new(&args.path);
 
-    let entries = rust_ls::visit_dir(path);
+    if !&args.recursive {
+        let entries = rust_ls::visit_dir(path);
+        print_output(&entries, &mut handle);
+    } else {
+        let entries = rust_ls::visit_recursive(path);
+        for ent in entries {
+            println!("---");
+            println!("{:?}", ent);
+        }
+    }
 
-    print_output(&entries, &mut handle);
 }
