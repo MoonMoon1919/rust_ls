@@ -3,7 +3,7 @@ use std::io::{self, Write, BufWriter, Stdout};
 use std::path::Path;
 
 use clap::Parser;
-use rust_ls;
+use rust_ls::{self, DirectoryContent};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -22,6 +22,12 @@ fn print_output(entries: &Vec<DirEntry>, buf_writer: &mut BufWriter<Stdout>) {
     }
 }
 
+fn print_recursive(entries: &Vec<DirectoryContent>, buf_writer: &mut BufWriter<Stdout>) {
+    for ent in entries {
+        let _ = writeln!(buf_writer, "{}", ent);
+    }
+}
+
 fn main() {
     let stdout = io::stdout();
     let mut handle = io::BufWriter::new(stdout);
@@ -34,10 +40,7 @@ fn main() {
         print_output(&entries, &mut handle);
     } else {
         let entries = rust_ls::visit_recursive(path);
-        for ent in entries {
-            println!("---");
-            println!("{:?}", ent);
-        }
+        print_recursive(&entries, &mut handle);
     }
 
 }

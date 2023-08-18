@@ -1,6 +1,7 @@
 use std::{
     fs::{self, DirEntry},
     path::Path,
+    fmt,
 };
 
 pub fn visit_dir(path: &Path) -> Vec<DirEntry> {
@@ -45,24 +46,33 @@ impl DirectoryContent {
     }
 }
 
+impl fmt::Display for DirectoryContent {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let contents_friendly: Vec<String> = self.contents
+                                                    .iter()
+                                                    .map(|f| f.file_name().to_string_lossy().into_owned())
+                                                    .collect();
+        write!(f, "{}:\n{:?}\n", self.name, contents_friendly)
+    }
+}
+
 pub fn visit_recursive(path: &Path) -> Vec<DirectoryContent> {
     let mut directory_contents: Vec<DirectoryContent> = vec![];
 
+    let mut dc = DirectoryContent::new(path.as_os_str().to_string_lossy().into_owned());
+
     for p in visit_dir(path) {
-        println!("Checking dir entry {:?}", p.path());
-
-        let mut dc = DirectoryContent::new(p.file_name().to_string_lossy().into_owned());
-
         if p.path().is_dir() {
-            // TODO:
-
+            let subpath_content = visit_recursive(&p.path());
+            for entry in subpath_content {
+                directory_contents.push(entry);
+            }
         } else {
-            let contents = visit_dir(&p.path());
-            dc.set_content(contents);
+            dc.add_content(p);
         }
-
-        directory_contents.push(dc);
     }
+
+    directory_contents.push(dc);
 
     directory_contents
 }
