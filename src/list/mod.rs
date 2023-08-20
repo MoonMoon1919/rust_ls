@@ -21,14 +21,12 @@ impl INode {
 }
 
 pub trait Filter {
-    fn filter(&self, item: &INode) -> bool {
-        false
-    }
+    fn filter(&self, item: &INode) -> bool;
 }
 
-pub struct IncludeDotFiles;
+pub struct ExcludeDotFiles;
 
-impl Filter for IncludeDotFiles {
+impl Filter for ExcludeDotFiles {
     fn filter(&self, item: &INode) -> bool {
         let name = &item.name;
 
@@ -40,13 +38,37 @@ impl Filter for IncludeDotFiles {
     }
 }
 
+pub struct IncludeDotFiles;
+
+impl Filter for IncludeDotFiles {
+    fn filter(&self, item: &INode) -> bool {
+        let _name = &item.name;
+
+        true
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_filter() {
+    fn test_filter_exclude() {
+        // Given
+        let path = path::PathBuf::from(".git");
+        let item = INode::new(String::from(".git"), true, path);
+        let filter = ExcludeDotFiles{};
+
+        // When
+        let result = filter.filter(&item);
+
+        // Then
+        assert_eq!(false, result)
+    }
+
+    #[test]
+    fn test_filter_include() {
         // Given
         let path = path::PathBuf::from(".git");
         let item = INode::new(String::from(".git"), true, path);

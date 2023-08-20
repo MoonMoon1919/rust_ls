@@ -12,10 +12,21 @@ struct Args {
 
     #[arg(short, long)]
     recursive: bool,
+
+    #[arg(short, long)]
+    all: bool,
 }
 
 fn print_output(entry: &DirectoryContent, buf_writer: &mut BufWriter<Stdout>) {
     let _ = writeln!(buf_writer, "{}", entry);
+}
+
+fn get_filter(show_all: bool) -> Box<dyn list::Filter> {
+    if show_all {
+        Box::new(list::IncludeDotFiles{})
+    } else {
+        Box::new(list::ExcludeDotFiles{})
+    }
 }
 
 fn main() {
@@ -24,7 +35,8 @@ fn main() {
 
     let args = Args::parse();
     let path = Path::new(&args.path);
-    let filter = list::IncludeDotFiles{};
+
+    let filter = get_filter(args.all);
 
     if !&args.recursive {
         let entry = rust_ls::visit_dir(path, &filter);

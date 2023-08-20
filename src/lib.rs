@@ -60,7 +60,7 @@ pub fn read_dir(path: &Path) -> Vec<list::INode> {
     entries
 }
 
-pub fn visit_dir(path: &Path, filter: &impl list::Filter) -> DirectoryContent {
+pub fn visit_dir(path: &Path, filter: &Box<dyn list::Filter>) -> DirectoryContent {
     let entries = read_dir(path);
 
     let filtered_entries = entries.into_iter().filter(|i| filter.filter(i)).collect();
@@ -69,7 +69,7 @@ pub fn visit_dir(path: &Path, filter: &impl list::Filter) -> DirectoryContent {
 }
 
 
-pub fn visit_recursive(path: &Path, filter: &impl list::Filter) -> Vec<DirectoryContent> {
+pub fn visit_recursive(path: &Path, filter: &Box<dyn list::Filter>) -> Vec<DirectoryContent> {
     let mut directory_contents: Vec<DirectoryContent> = vec![];
 
     let dc = visit_dir(path, filter);
